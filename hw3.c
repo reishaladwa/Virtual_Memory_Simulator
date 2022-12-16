@@ -26,7 +26,6 @@ void showptable();
 void initializeEverything();
 void initializeptable();
 void initializemainmemory();
-//void initializediskmemory();
 int addresstopagenum(int vaddr);
 bool ispageinmainmemory(int pgn);
 void movepagetomainmem();
@@ -52,8 +51,6 @@ int main(int argc, const char *argv[])
     {
         algo = 1;
     }
-    // if (algo == 0){printf("my algo is FIFO\n");}
-    // if (algo == 1){printf("my algo is LRU\n");}
 
     while (1)
     {
@@ -111,7 +108,6 @@ int main(int argc, const char *argv[])
                     if (freeMemPage == -1)
                     {
                         // find what page to swap
-                        //printf("Oops there is no free memory page.. will need do swap with virtual .. \n");
                         //identify page num in main memory to remove based on time stamp value
                         //determine based on minimum value of time stamp -> iterate through page table for valid bit == 1
                         //move page <pgnum> to main memory
@@ -182,11 +178,6 @@ void write(int vir_add, int n){
         int freeMemPage = getfreemempage();
         if (freeMemPage == -1)
             {
-                // find what page to swap
-                // printf("Oops there is no free memory page.. will need do swap with virtual .. \n");
-                //identify page num in main memory to remove based on time stamp value
-                //determine based on minimum value of time stamp -> iterate through page table for valid bit == 1
-                //move page <pgnum> to main memory
                 int mpn = findMpnBasedOnTime();
                 // printf("the mpn based on time is: %d\n", mpn);
                 int thisPage = addresstopagenum(main_memory[mpn*8].address);
@@ -208,8 +199,6 @@ void write(int vir_add, int n){
                 p_table[pgnum].time_stamp = counter;
                 counter++;
             }
-            //move page <pgnum> to main memory ex: move pgnum 7 to main memory 2
-            // printf("pgnum = %d, pgnum*8 + 1 = %d\n", pgnum, pgnum*8 + 1);
             moveVtoM(pgnum, freeMemPage);
         }
     }
@@ -282,12 +271,12 @@ void movepagetomainmem()
     //return freemempage;
 }
 
-void showptable() //change into a switch
+void showptable()
 {
     int i;
     for (i = 0; i < 16; i++)
     {
-        //printf("%d:%d:%d:%d - %d\n", p_table[i].v_page_num, p_table[i].valid_bit, p_table[i].dirty_bit, p_table[i].PN, p_table[i].time_stamp);
+    
         printf("%d:%d:%d:%d\n", p_table[i].v_page_num, p_table[i].valid_bit, p_table[i].dirty_bit, p_table[i].PN);
     }
 }
@@ -296,7 +285,6 @@ void showmain(int p)
 {
     for (int i = 0; i < 8; i++)
     {
-        //printf("%d: %d\n", main_memory[p * 8 + i].address, main_memory[p * 8 + i].data);
         printf("%d: %d\n", p * 8 + i, main_memory[p * 8 + i].data);
     }
     return;
@@ -323,7 +311,7 @@ void initializeptable()
     for (i = 0; i < 16; i++)
     {
         p_table[i].v_page_num = i;
-        p_table[i].PN = i; //REISHA changed from i to -1. Per Assignment+3.pdf I changed back to i.
+        p_table[i].PN = i;
         p_table[i].valid_bit = 0;
         p_table[i].dirty_bit = 0;
         p_table[i].time_stamp = 0;
@@ -374,41 +362,45 @@ bool ispageinmainmemory(int pgn)
     return pageinmem;
 }
 
-// PARSING INPUT
+
+// parse input into an array of strings where each string is a command separated by a space
 char **getCommands(char *orig)
 {
     char **sub_str = malloc(10 * sizeof(char *));
+    for (int i = 0; i < 10; i++)
+    {
+        sub_str[i] = malloc(20 * sizeof(char));
+    }
+
     char line[80];
     strcpy(line, orig);
-    // printf("Inside getCommands() %s ", line);
+
     int numTokens = 0;
-    char *token;
-    token = strtok(line, " \n");
+    char *token = strtok(line, " \n");
     while (token != NULL)
     {
-        // printf(" %s\n", token);
-        sub_str[numTokens] = malloc(20 * sizeof(char));
         strcpy(sub_str[numTokens], token);
-        numTokens = numTokens + 1;
+        numTokens++;
         token = strtok(NULL, " \n");
     }
+
     return sub_str;
 }
 
+//count the number of tokens (commands) in a string
 int getNumberOfTokens(char *orig)
 {
     char line[80];
     strcpy(line, orig);
+
     int numTokens = 0;
-    char *token;
-    token = strtok(line, " \n");
+    char *token = strtok(line, " \n");
     while (token != NULL)
     {
-        numTokens = numTokens + 1;
+        numTokens++;
         token = strtok(NULL, " \n");
     }
+
     return numTokens;
 }
 
-// time stamp
-// copy into main memory (from disk_memory )
